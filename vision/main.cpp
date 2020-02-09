@@ -1,15 +1,8 @@
 #include <iostream>
+#include "tttBoard.h"
 #include <opencv2/opencv.hpp>
 
 using namespace cv;
-
-class ChkrBoard {
-    int board[8][8]{};
-public:
-    int playRed(int row, int col){
-        if board
-    }
-};
 
 void get_checkers_board(Mat const& img){
     Mat corners;
@@ -32,9 +25,13 @@ void get_checkers_board(Mat const& img){
 
 int main() {
 
-    ChkrBoard board;
+    tttBoard board;
 
-    std::cout << board.board[1][1] << std::endl;
+    Board representation
+    {3, std::vector<player_type>(3, NONE)};
+
+
+
 //    Mat img;
 //    img = imread("../imgs/cntrs.jpg");
 //    resize(img, img, Size(), 0.2, 0.2, INTER_AREA);
