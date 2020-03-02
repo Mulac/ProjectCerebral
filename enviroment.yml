@@ -1,4 +1,4 @@
-name: base
+name: robot
 channels:
   - defaults
 dependencies:
