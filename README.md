@@ -2,7 +2,7 @@
 
 ### This is our current project structure.
 
-Vision scripts contain notebooks simply used for quick experimentation.
+vision_scripts contain notebooks simply used for quick experimentation.
 
 ProjectCerebral<br>
 ├── boards<br>
@@ -21,8 +21,11 @@ Vision is a module that contains all the generic vision functions.
 Control will be a module that contains an interface for communicating with the ev3.
 
 
-USE:
- 1. Clone repo with `$ git clone ...`
- 2. Activate conda enviroment with "$ conda activate"
- 3. Open notebooks with "$ jupyter notebook"
+## USE
+ 1. Clone repo with `$ git clone https://github.com/Mulac/ProjectCerebral.git`
+ 2. Install anaconda https://www.anaconda.com/distribution/ - we use conda enviroments to manage dependancies
+ 3. `cd` into ProjectCerebral directory
+ 4. `conda env create -f environment.yml` to create enviroment from yaml file
+ 5. `conda activate robot` to enter the enviroment
+ 6. `python main.py` to run the program
 
