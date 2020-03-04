@@ -12,7 +12,6 @@ class Board():
 
     def __init__(self):
         self.board = None
-        self.move = 0
         self.isects = None
 
     def next_player(self):

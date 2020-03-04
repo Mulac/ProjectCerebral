@@ -8,10 +8,13 @@ from scipy.spatial.distance import pdist, euclidean
 
 class NineMensMorris(Board):
 
-    def __init__(self):
+    def __init__(self, board=None, move=0, stage=1):
         super(NineMensMorris, self).__init__()
-        self.board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
-        self.stage = 1
+        if board is None:
+            board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
+        self.board = board
+        self.move = move
+        self.stage = stage
 
     def is_valid_move(self, brd):
         if self.stage == 1:
@@ -73,8 +76,8 @@ class NineMensMorris(Board):
                     if vision == Player.EMPTY and model == opponent:
                         removes.append((ring, row, col))
                     elif vision == player and model == Player.EMPTY:
-                        vNeighbours = self.getNeighbours(ring, row, col, brd)
-                        mNeighbours = self.getNeighbours(ring, row, col, self.board)
+                        vNeighbours = self.get_neighbours(ring, row, col, brd)
+                        mNeighbours = self.get_neighbours(ring, row, col, self.board)
                         if (move or
                             vNeighbours.count(player) != mNeighbours.count(player) + 1 or
                             vNeighbours.count(opponent) != mNeighbours.count(opponent)):
@@ -90,6 +93,27 @@ class NineMensMorris(Board):
         else:
             return changes == 2
 
+    def is_end(self):
+        human_count = 0
+        computer_count = 0
+
+        for ring in range(3):
+            for row in range(3):
+                for col in range(3):
+                    if row == 1 and col == 1:  # This is important
+                        continue
+                    if self.board == Player.HUMAN:
+                        human_count += 1
+                    elif self.board == Player.COMPUTER:
+                        computer_count += 1
+
+        if human_count <= 2:
+            return Player.COMPUTER
+        elif computer_count <= 2:
+            return Player.HUMAN
+        else:
+            return None
+
     def isMill(self, board, i, j, k):
         if j == 1 and k == 1:
             raise Exception("Can't look at the center of the board")
@@ -102,7 +126,7 @@ class NineMensMorris(Board):
                     len(set(board[i][:][k])) <= 1 or
                     len(set(board[i][j][:])) <= 1)
 
-    def getNeighbours(self, i, j, k, board):
+    def get_neighbours(self, i, j, k, board):
         if j == 1 and k == 1:
             raise Exception("Can't look at the center of the board")
         if (j == 0 or j == 2) and (k == 0 or k == 2):   # Corner positions with only 2 neighbours

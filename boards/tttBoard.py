@@ -4,9 +4,12 @@ from vision import Position
 
 class TicTacToe(Board):
 
-    def __init__(self):
+    def __init__(self, board=None, move=0):
         super(TicTacToe, self).__init__()
-        self.board = [[Player.EMPTY for x in range(3)] for y in range(3)]
+        if board is None:
+            board = [[Player.EMPTY for x in range(3)] for y in range(3)]
+        self.board = board
+        self.move = move
 
     def is_valid_move(self, brd):
         diff_count = 0
@@ -15,7 +18,7 @@ class TicTacToe(Board):
             for col in range(3):
                 current = self.board[row][col]
                 vision = brd[row][col]
-                if vision != current:  # Find the differences
+                if visiminon != current:  # Find the differences
                     # Make sure only 1 difference with the correct player choosing empty Position
                     if diff_count > 0 or current != Player.EMPTY or vision != self.next_player():
                         return False
