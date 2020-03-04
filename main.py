@@ -8,22 +8,21 @@ Representation.show()
 cap = vision.cv2.VideoCapture(0)
 frame_count = 0
 
-while(True):
+while True:
     # Capture frame-by-frame
     ret, frame = cap.read()
     frame_count += 1
-    if (frame_count % 1 == 0):
+    if frame_count % 1 == 0:
         if frame_count == 1:
-            intersections = vision.find_board(frame, 24)
+            intersections = vision.find_board(frame, 4)
+            Representation.build_board(intersections)
 
-        
         counters, cimg = vision.find_counters(frame)
         if counters is not None:    # Counters have started being placed
-            board = Representation.compute_state(counters, intersections)
+            board = Representation.compute_state(counters)
             if Representation.isValidMove(board):
                 Representation.updateBoard(board)
                 Representation.show()
-            
 
         # Display the resulting frame
         vision.cv2.imshow('counters', cimg)
