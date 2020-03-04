@@ -20,8 +20,8 @@ while True:
         counters, cimg = vision.find_counters(frame)
         if counters is not None:    # Counters have started being placed
             board = Representation.compute_state(counters)
-            if Representation.isValidMove(board):
-                Representation.updateBoard(board)
+            if Representation.is_valid_move(board):
+                Representation.update_board(board)
                 Representation.show()
 
         # Display the resulting frame

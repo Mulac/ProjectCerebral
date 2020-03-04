@@ -13,7 +13,7 @@ class NineMensMorris(Board):
         self.board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
         self.stage = 1
 
-    def isValidMove(self, brd):
+    def is_valid_move(self, brd):
         if self.stage == 1:
             return self.stage1Move(brd)
         elif self.stage == 2:
@@ -34,14 +34,14 @@ class NineMensMorris(Board):
                     vision = brd[ring][row][col]
                     model = self.board[ring][row][col]
                     if vision != model:
-                        if diff_count > 0 or model != Player.EMPTY or vision != self.nextPlayer():
+                        if diff_count > 0 or model != Player.EMPTY or vision != self.next_player():
                             return False
                         diff_count += 1
         
         return diff_count == 1
 
     def stage2Move(self, brd):
-        player = self.nextPlayer()
+        player = self.next_player()
         if player == Player.HUMAN:
             opponent = Player.COMPUTER
         else:

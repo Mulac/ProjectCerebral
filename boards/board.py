@@ -15,15 +15,19 @@ class Board():
         self.move = 0
         self.isects = None
 
-    def nextPlayer(self):
+    def next_player(self):
         return Player(self.move % 2 + 2)
 
-    def updateBoard(self, brd):
+    def update_board(self, brd):
         self.board = brd
         self.move += 1
 
     @abc.abstractmethod
-    def isValidMove(self, brd):
+    def is_valid_move(self, brd):
+        return
+
+    @abc.abstractmethod
+    def is_end(self):
         return
 
     @abc.abstractmethod

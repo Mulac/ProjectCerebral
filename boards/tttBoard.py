@@ -8,7 +8,7 @@ class TicTacToe(Board):
         super(TicTacToe, self).__init__()
         self.board = [[Player.EMPTY for x in range(3)] for y in range(3)]
 
-    def isValidMove(self, brd):
+    def is_valid_move(self, brd):
         diff_count = 0
 
         for row in range(3):
@@ -17,12 +17,25 @@ class TicTacToe(Board):
                 vision = brd[row][col]
                 if vision != current:  # Find the differences
                     # Make sure only 1 difference with the correct player choosing empty Position
-                    if diff_count > 0 or current != Player.EMPTY or vision != self.nextPlayer():
+                    if diff_count > 0 or current != Player.EMPTY or vision != self.next_player():
                         return False
                     diff_count += 1
 
         # Ensures a move has actually been made
         return diff_count == 1
+
+    def is_end(self):
+        # Start by adding the diagonals
+        lines = [[self.board[i][i] for i in range(3)], [self.board[i][2-i] for i in range(3)]]
+        # Now Add the horizontals and verticals
+        for i in range(3):
+            lines.extend([self.board[:][i], self.board[i][:]])
+        # Check if any line contains the same value, if so and not empty return the winner
+        for line in lines:
+            if len(set(line)) == 1 and line[0] != Player.EMPTY:
+                return line[0]
+
+        return None
 
     def build_board(self, isects):
         # Order intersections from top to bottom
