@@ -1,9 +1,10 @@
 import vision
+from minimax import negamax
 from boards.tttBoard import TicTacToe
 from boards.nmmBoard import NineMensMorris
 
-Representation = NineMensMorris()
-Representation.show()
+representation = TicTacToe()
+representation.show()
 
 cap = vision.cv2.VideoCapture(0)
 frame_count = 0
@@ -15,14 +16,14 @@ while True:
     if frame_count % 1 == 0:
         if frame_count == 1:
             intersections = vision.find_board(frame, 4)
-            Representation.build_board(intersections)
+            representation.build_board(intersections)
 
         counters, cimg = vision.find_counters(frame)
         if counters is not None:    # Counters have started being placed
-            board = Representation.compute_state(counters)
-            if Representation.is_valid_move(board):
-                Representation.update_board(board)
-                Representation.show()
+            board = representation.compute_state(counters)
+            if representation.is_valid_move_state(board):
+                representation.update_board(board)
+                representation.show()
 
         # Display the resulting frame
         vision.cv2.imshow('counters', cimg)

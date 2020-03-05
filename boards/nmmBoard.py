@@ -8,15 +8,11 @@ from scipy.spatial.distance import pdist, euclidean
 
 class NineMensMorris(Board):
 
-    def __init__(self, board=None, move=0, stage=1):
+    def __init__(self):
         super(NineMensMorris, self).__init__()
-        if board is None:
-            board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
-        self.board = board
-        self.move = move
-        self.stage = stage
+        self.stage = 1
 
-    def is_valid_move(self, brd):
+    def is_valid_move_state(self, brd):
         if self.stage == 1:
             return self.stage1Move(brd)
         elif self.stage == 2:
@@ -185,42 +181,42 @@ class NineMensMorris(Board):
         return board
 
     def show(self):
-        # print()
-        # for ring in self.board:
-        #     print(ring)
-        b = self.board
-
-        app = QApplication(sys.argv)
-        win = QWidget()
-        grid = QGridLayout()
-
-        grid.addWidget(QLabel(b[0][0][0].name),0,0)
-        grid.addWidget(QLabel(b[0][0][1].name),0,3)
-        grid.addWidget(QLabel(b[0][0][2].name),0,6)
-        grid.addWidget(QLabel(b[0][1][0].name),3,0)
-        grid.addWidget(QLabel(b[0][1][2].name),3,6)
-        grid.addWidget(QLabel(b[0][2][0].name),6,0)
-        grid.addWidget(QLabel(b[0][2][1].name),6,3)
-        grid.addWidget(QLabel(b[0][2][2].name),6,6)
-        grid.addWidget(QLabel(b[1][0][0].name),1,1)
-        grid.addWidget(QLabel(b[1][0][1].name),1,3)
-        grid.addWidget(QLabel(b[1][0][2].name),1,5)
-        grid.addWidget(QLabel(b[1][1][0].name),3,1)
-        grid.addWidget(QLabel(b[1][1][2].name),3,5)
-        grid.addWidget(QLabel(b[1][2][0].name),5,1)
-        grid.addWidget(QLabel(b[1][2][1].name),5,3)
-        grid.addWidget(QLabel(b[1][2][2].name),5,5)
-        grid.addWidget(QLabel(b[2][0][0].name),2,2)
-        grid.addWidget(QLabel(b[2][0][1].name),2,3)
-        grid.addWidget(QLabel(b[2][0][2].name),2,4)
-        grid.addWidget(QLabel(b[2][1][0].name),3,2)
-        grid.addWidget(QLabel(b[2][1][2].name),3,4)
-        grid.addWidget(QLabel(b[2][2][0].name),4,2)
-        grid.addWidget(QLabel(b[2][2][1].name),4,3)
-        grid.addWidget(QLabel(b[2][2][2].name),4,4)
-
-        win.setLayout(grid)
-        win.setWindowTitle("Nine Mens Morris Representation")
-        win.setGeometry(50,50,450,450)
-        win.show()
-        sys.exit(app.exec_())
+        print()
+        for ring in self.board:
+            print(ring)
+        # b = self.board
+        #
+        # app = QApplication(sys.argv)
+        # win = QWidget()
+        # grid = QGridLayout()
+        #
+        # grid.addWidget(QLabel(b[0][0][0].name),0,0)
+        # grid.addWidget(QLabel(b[0][0][1].name),0,3)
+        # grid.addWidget(QLabel(b[0][0][2].name),0,6)
+        # grid.addWidget(QLabel(b[0][1][0].name),3,0)
+        # grid.addWidget(QLabel(b[0][1][2].name),3,6)
+        # grid.addWidget(QLabel(b[0][2][0].name),6,0)
+        # grid.addWidget(QLabel(b[0][2][1].name),6,3)
+        # grid.addWidget(QLabel(b[0][2][2].name),6,6)
+        # grid.addWidget(QLabel(b[1][0][0].name),1,1)
+        # grid.addWidget(QLabel(b[1][0][1].name),1,3)
+        # grid.addWidget(QLabel(b[1][0][2].name),1,5)
+        # grid.addWidget(QLabel(b[1][1][0].name),3,1)
+        # grid.addWidget(QLabel(b[1][1][2].name),3,5)
+        # grid.addWidget(QLabel(b[1][2][0].name),5,1)
+        # grid.addWidget(QLabel(b[1][2][1].name),5,3)
+        # grid.addWidget(QLabel(b[1][2][2].name),5,5)
+        # grid.addWidget(QLabel(b[2][0][0].name),2,2)
+        # grid.addWidget(QLabel(b[2][0][1].name),2,3)
+        # grid.addWidget(QLabel(b[2][0][2].name),2,4)
+        # grid.addWidget(QLabel(b[2][1][0].name),3,2)
+        # grid.addWidget(QLabel(b[2][1][2].name),3,4)
+        # grid.addWidget(QLabel(b[2][2][0].name),4,2)
+        # grid.addWidget(QLabel(b[2][2][1].name),4,3)
+        # grid.addWidget(QLabel(b[2][2][2].name),4,4)
+        #
+        # win.setLayout(grid)
+        # win.setWindowTitle("Nine Mens Morris Representation")
+        # win.setGeometry(50,50,450,450)
+        # win.show()
+        # sys.exit(app.exec_())

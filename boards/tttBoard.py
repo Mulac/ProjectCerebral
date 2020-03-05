@@ -1,44 +1,57 @@
+from itertools import product
 from .board import Board, Player
 from vision import Position
 
 
 class TicTacToe(Board):
 
-    def __init__(self, board=None, move=0):
+    def __init__(self):
         super(TicTacToe, self).__init__()
-        if board is None:
-            board = [[Player.EMPTY for x in range(3)] for y in range(3)]
-        self.board = board
-        self.move = move
+        self.board = [[Player.EMPTY for x in range(3)] for y in range(3)]
 
-    def is_valid_move(self, brd):
-        diff_count = 0
+    def possible_moves(self):
+        return [(x, y) for x, y in product(range(3), repeat=2) if self.board[x][y] == Player.EMPTY]
 
-        for row in range(3):
-            for col in range(3):
-                current = self.board[row][col]
-                vision = brd[row][col]
-                if visiminon != current:  # Find the differences
-                    # Make sure only 1 difference with the correct player choosing empty Position
-                    if diff_count > 0 or current != Player.EMPTY or vision != self.next_player():
-                        return False
-                    diff_count += 1
-
-        # Ensures a move has actually been made
-        return diff_count == 1
+    def play_move(self, move):
+        x, y = move
+        if self.board[x][y] != Player.EMPTY:
+            raise Exception("Player has already made that move")
+        self.board[x][y] = self.player
+        self.move += 1
+        self.switch_player()
 
     def is_end(self):
         # Start by adding the diagonals
         lines = [[self.board[i][i] for i in range(3)], [self.board[i][2-i] for i in range(3)]]
         # Now Add the horizontals and verticals
         for i in range(3):
-            lines.extend([self.board[:][i], self.board[i][:]])
+            lines.extend([[row[i] for row in self.board], self.board[i]])
         # Check if any line contains the same value, if so and not empty return the winner
         for line in lines:
             if len(set(line)) == 1 and line[0] != Player.EMPTY:
                 return line[0]
 
+        # Is a tie if no more possible moves
+        if self.move >= 9:
+            return Player.EMPTY
+
         return None
+
+    def is_valid_move_state(self, brd):
+        diff_count = 0
+
+        for row in range(3):
+            for col in range(3):
+                current = self.board[row][col]
+                vision = brd[row][col]
+                if vision != current:  # Find the differences
+                    # Make sure only 1 difference with the correct player choosinqg empty Position
+                    if diff_count > 0 or current != Player.EMPTY or vision != self.player:
+                        return False
+                    diff_count += 1
+
+        # Ensures a move has actually been made
+        return diff_count == 1
 
     def build_board(self, isects):
         # Order intersections from top to bottom
