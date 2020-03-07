@@ -5,7 +5,8 @@ from scipy.spatial.distance import pdist, euclidean, squareform
 
 center = None
 
-class Position():
+
+class Position:
     def __init__(self, pos):
         self.pos = pos
         self.ofset = euclidean(center, pos)
@@ -37,7 +38,7 @@ def find_board(img, limit):
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 25, 30)
 
     line_segments = []
-    r = 0.12
+    r = 0.08
     if lines is not None:
         for line in lines:
             for x1,y1,x2,y2 in line:

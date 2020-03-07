@@ -10,6 +10,7 @@ class NineMensMorris(Board):
 
     def __init__(self):
         super(NineMensMorris, self).__init__()
+        self.board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
         self.stage = 1
 
     def is_valid_move_state(self, brd):
@@ -90,9 +91,11 @@ class NineMensMorris(Board):
             return changes == 2
 
     def is_end(self):
+        if self.stage != 3:
+            return None
+
         human_count = 0
         computer_count = 0
-
         for ring in range(3):
             for row in range(3):
                 for col in range(3):
@@ -135,7 +138,8 @@ class NineMensMorris(Board):
             neighbours.append((1, j, k))
         return [board[x][y][z] for x, y, z in neighbours]
 
-    def build_board(self, isects):
+    def build_board(self, get_isects, frame):
+        isects = get_isects(frame, 24)
         self.isects = [[[0 for z in range(3)] for y in range(3)] for x in range(3)]
 
         tempx = sorted(isects, key=lambda p: p.x)
@@ -154,13 +158,14 @@ class NineMensMorris(Board):
 
                 self.isects[ring][i][col] = tempy[i]
 
-        middle = sorted(middle, key=lambda p: p.y)
+        middle = sorted(middle, key=lambda p: p.y)  # Add the middle column
         self.isects[0][0][1] = middle[0]
         self.isects[1][0][1] = middle[1]
         self.isects[2][0][1] = middle[2]
         self.isects[2][2][1] = middle[3]
         self.isects[1][2][1] = middle[4]
         self.isects[0][2][1] = middle[5]
+
 
     def compute_state(self, counters):
         board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
@@ -173,7 +178,7 @@ class NineMensMorris(Board):
                     isect = self.isects[i][j][k]
                     for counter in counters:
                         if euclidean(counter[:2], isect.pos) < 15:
-                            if counter[5] > 100:
+                            if counter[5] > 80:
                                 board[i][j][k] = Player.HUMAN
                             else:
                                 board[i][j][k] = Player.COMPUTER

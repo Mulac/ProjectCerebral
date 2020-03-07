@@ -42,7 +42,7 @@ class Board:
         return
 
     @abc.abstractmethod
-    def build_board(self, isects):
+    def build_board(self, get_isects, frame):
         return
 
     @abc.abstractmethod

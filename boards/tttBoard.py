@@ -53,7 +53,8 @@ class TicTacToe(Board):
         # Ensures a move has actually been made
         return diff_count == 1
 
-    def build_board(self, isects):
+    def build_board(self, get_isects, frame):
+        isects = get_isects(frame, 4)
         # Order intersections from top to bottom
         isects = sorted(isects, key=lambda p: p.x)
         isects[:2] = sorted(isects[:2], key=lambda p: p.y)
@@ -83,7 +84,7 @@ class TicTacToe(Board):
                 if (self.isects[row][col].x < c[0] < self.isects[row + 1][col + 1].x and
                         self.isects[row + 1][col + 1].y > c[1] > self.isects[row][col].y):
 
-                    if c[5] > 100:
+                    if c[5] > 80:
                         board[col][row] = Player.HUMAN
                     else:
                         board[col][row] = Player.COMPUTER
