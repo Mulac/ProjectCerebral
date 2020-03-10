@@ -3,6 +3,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
+
 from scipy.spatial.distance import pdist, euclidean
 
 
@@ -13,17 +14,45 @@ class NineMensMorris(Board):
         self.board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
         self.stage = 1
 
+    @staticmethod
+    def is_mill(board, i, j, k):
+        if j == 1 and k == 1:
+            raise Exception("Can't look at the center of the board")
+        if board[i][j][k] == Player.EMPTY:
+            return False
+        elif (j == 0 or j == 2) and (k == 0 or k == 2):   # Corner case can't go across levels
+            return len(set(board[i][:][k])) <= 1 or len(set(board[i][j][:])) <= 1
+        else:
+            return (len(set(board[:][j][k])) <= 1 or
+                    len(set(board[i][:][k])) <= 1 or
+                    len(set(board[i][j][:])) <= 1)
+
+    @staticmethod
+    def get_neighbours(i, j, k, board):
+        if j == 1 and k == 1:
+            raise Exception("Can't look at the center of the board")
+        if (j == 0 or j == 2) and (k == 0 or k == 2):   # Corner positions with only 2 neighbours
+            neighbours = [(i, j-1 if j == 2 else j+1, k), (i, j, k-1 if k == 2 else k+1)]
+        elif i == 1:                                    # Middle ring with 4 neighbours
+            neighbours = [(i, 0, k), (i, 2, k)] if j == 1 else [(i, j, 0), (i, j, 2)]
+            neighbours.extend([(0, j, k), (2, j, k)])
+        else:                                           # Remaining edge neighbours with 3 neighbours
+            neighbours = [(i, 0, k), (i, 2, k)] if j == 1 else [(i, j, 0), (i, j, 2)]
+            neighbours.append((1, j, k))
+        return [board[x][y][z] for x, y, z in neighbours]
+
     def is_valid_move_state(self, brd):
         if self.stage == 1:
-            return self.stage1Move(brd)
+            return self.stage_1(brd)
         elif self.stage == 2:
-            return self.stage2Move(brd)
-        elif self.stage == 3:
-            return self.stage3Move(brd)
+            return self.stage_2(brd)
         else:
             raise Exception("Game in an invalid stage")
 
-    def stage1Move(self, brd):
+    def stage_1(self, brd):
+        human_count = 0
+        computer_count = 0
+
         diff_count = 0
 
         for ring in range(3):
@@ -33,14 +62,27 @@ class NineMensMorris(Board):
                         continue                # We never want to look at the center
                     vision = brd[ring][row][col]
                     model = self.board[ring][row][col]
+
+                    # Update player counts
+                    if model == Player.HUMAN:
+                        human_count += 1
+                    elif model == Player.COMPUTER:
+                        computer_count += 1
+
+                    # Check for valid differences (next player adds a piece to empty position)
                     if vision != model:
                         if diff_count > 0 or model != Player.EMPTY or vision != self.next_player():
                             return False
                         diff_count += 1
-        
-        return diff_count == 1
 
-    def stage2Move(self, brd):
+        # It's the next stage!
+        if human_count and computer_count == 9:
+            self.stage = 1
+            return self.stage_2(brd)
+        
+        return diff_count == 1      # If there's only one difference accept the move
+
+    def stage_2(self, brd):
         player = self.next_player()
         if player == Player.HUMAN:
             opponent = Player.COMPUTER
@@ -85,13 +127,13 @@ class NineMensMorris(Board):
             return False
         
         # Was a mill created
-        if self.isMill(brd, *move):
+        if NineMensMorris.is_mill(brd, *move):
             return len(removes) == 1
         else:
             return changes == 2
 
     def is_end(self):
-        if self.stage != 3:
+        if self.stage != 2:
             return None
 
         human_count = 0
@@ -113,41 +155,29 @@ class NineMensMorris(Board):
         else:
             return None
 
-    def isMill(self, board, i, j, k):
-        if j == 1 and k == 1:
-            raise Exception("Can't look at the center of the board")
-        if board[i][j][k] == Player.EMPTY:
-            return False
-        elif (j == 0 or j == 2) and (k == 0 or k == 2):   # Corner case can't go accross levels
-            return (len(set(board[i][:][k])) <= 1 or len(set(board[i][j][:])) <= 1)
-        else:
-            return (len(set(board[:][j][k])) <= 1 or
-                    len(set(board[i][:][k])) <= 1 or
-                    len(set(board[i][j][:])) <= 1)
-
-    def get_neighbours(self, i, j, k, board):
-        if j == 1 and k == 1:
-            raise Exception("Can't look at the center of the board")
-        if (j == 0 or j == 2) and (k == 0 or k == 2):   # Corner positions with only 2 neighbours
-            neighbours = [(i, j-1 if j == 2 else j+1, k), (i, j, k-1 if k == 2 else k+1)]
-        elif i == 1:                                    # Middle ring with 4 neighbours
-            neighbours = [(i, 0, k), (i, 2, k)] if j == 1 else [(i, j, 0), (i, j, 2)]
-            neighbours.extend([(0, j, k), (2, j, k)])
-        else:                                           # Remaining edge neighbours with 3 neighbours
-            neighbours = [(i, 0, k), (i, 2, k)] if j == 1 else [(i, j, 0), (i, j, 2)]
-            neighbours.append((1, j, k))
-        return [board[x][y][z] for x, y, z in neighbours]
+    def play_move(self, move):
+        raise NotImplementedError
 
     def build_board(self, get_isects, frame):
-        isects = get_isects(frame, 24)
+        # The intersections of the board are first ordered so that when computing the board state
+        # counters that are over an intersection will be at the same index in the board data structure.
+
+        # That is: a 3x3x3 array indexed first by ring level then row then col --> board[ring][row][col]
+
+        # We then use the outer 4 intersections to translate the pixel measure to millimeters knowing the size
+        # of our Nine Men's Morris board
+
+        isects = get_isects(frame, 24)  # First grab the first 24 intersections from the center of the frame
+        if len(isects) != 24:
+            raise Exception("Could not find 24 intersections.  Found {}".format(len(isects)))
         self.isects = [[[0 for z in range(3)] for y in range(3)] for x in range(3)]
 
-        tempx = sorted(isects, key=lambda p: p.x)
-        middle = tempx[9:15]
-        del tempx[9:15]
+        temp_x = sorted(isects, key=lambda p: p.x)
+        middle = temp_x[9:15]
+        del temp_x[9:15]
 
         for x in range(0, 18, 3):   # Look down each column (except for center column and add isects)
-            tempy = sorted(tempx[x:x + 3], key=lambda p: p.y)   # Order the column by its y position
+            temp_y = sorted(temp_x[x:x + 3], key=lambda p: p.y)   # Order the column by its y position
             for i in range(3):  # Add to the correct position in the 3x3x3 array
                 if x < 9:
                     col = 0
@@ -156,7 +186,7 @@ class NineMensMorris(Board):
                     col = 2
                     ring = (x % 5) // 2
 
-                self.isects[ring][i][col] = tempy[i]
+                self.isects[ring][i][col] = temp_y[i]
 
         middle = sorted(middle, key=lambda p: p.y)  # Add the middle column
         self.isects[0][0][1] = middle[0]
@@ -166,6 +196,8 @@ class NineMensMorris(Board):
         self.isects[1][2][1] = middle[4]
         self.isects[0][2][1] = middle[5]
 
+        # Now begin px -> mm translation
+        x_diff = abs(self.isects[0][0][0].pos - self.isects[0][0][2].pos)
 
     def compute_state(self, counters):
         board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
