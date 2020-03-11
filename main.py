@@ -1,15 +1,20 @@
 import sys
 import vision
-from minimax import negamax
+from negamax import negamax
 from boards.tttBoard import TicTacToe
 from boards.nmmBoard import NineMensMorris
 
+corners = None
+
 
 def setup():
+    global corners
     ret, img = cap.read()
-    game.build_board(vision.find_board, img)
+
     if isinstance(game, NineMensMorris):
-        print("yup")
+        corners = game.build_board(vision.find_board, img)
+    else:
+        game.build_board(vision.find_board, img)
 
 
 def play(representation):
@@ -17,6 +22,7 @@ def play(representation):
         # representation.show()
         # Capture frame-by-frame
         ret, frame = cap.read()
+        frame = vision.deskew(frame, corners)
 
         winner = representation.is_end()
         if winner:

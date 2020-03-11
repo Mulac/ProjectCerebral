@@ -196,8 +196,8 @@ class NineMensMorris(Board):
         self.isects[1][2][1] = middle[4]
         self.isects[0][2][1] = middle[5]
 
-        # Now begin px -> mm translation
-        x_diff = abs(self.isects[0][0][0].pos - self.isects[0][0][2].pos)
+        # Return the 4 corners for image skewing and pixel -> millimeter translation
+        return [self.isects[0][0][0], self.isects[0][0][2], self.isects[0][2][0], self.isects[0][2][0]]
 
     def compute_state(self, counters):
         board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]

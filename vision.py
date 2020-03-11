@@ -21,6 +21,15 @@ def preprocess(image):
     blur_gray = cv2.GaussianBlur(gray, (kernel_size, kernel_size), 0)
 
     return blur_gray
+
+
+def deskew(img, corners):
+    pts1 = np.float32([p.pos for p in corners])
+    pts2 = np.float32([[200, 200], [600, 200], [200, 600], [600, 600]])
+    transformation = cv2.getPerspectiveTransform(pts1, pts2)
+    orthogonal = cv2.warpPerspective(img, transformation, (800, 800))
+
+    return orthogonal
     
 
 def find_board(img, limit):
