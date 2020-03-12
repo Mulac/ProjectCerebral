@@ -6,7 +6,7 @@ infinity = float('infinity')
 
 def decision(game, depth):
     root_state = deepcopy(game)
-    return negamax(root_state, depth)[0]
+    return negamax(root_state, depth, -infinity, infinity)[0]
 
 
 def evaluate(player, winner):
@@ -18,7 +18,7 @@ def evaluate(player, winner):
         return -100
 
 
-def negamax(game, depth):
+def negamax(game, depth, alpha, beta):
 
     best = [None, -infinity]
 
@@ -35,11 +35,15 @@ def negamax(game, depth):
 
         game.play_move(move)
 
-        value = negamax(game, depth - 1)
+        value = negamax(game, depth - 1, -beta, -alpha)
         value[0] = move
         value[1] *= -1
 
         if value[1] > best[1]:
             best = value
+
+        alpha = max(alpha, value[1])
+        if alpha >= beta:
+            break
 
     return best
