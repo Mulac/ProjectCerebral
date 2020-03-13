@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from boards.board import Player
 from poly_point_isect import isect_segments
 from scipy.spatial.distance import pdist, euclidean, squareform
 
@@ -7,11 +8,20 @@ center = None
 
 
 class Position:
-    def __init__(self, pos):
+    def __init__(self, pos, radius=None, player=None):
         self.pos = pos
-        self.ofset = euclidean(center, pos)
+        self.radius = radius
+        self.player = player
         self.x = pos[0]
         self.y = pos[1]
+
+    def offset(self):
+        return euclidean(center, self.pos)
+
+    def translate_from_origin(self):
+        x, y = 400 - self.x, 400 - self.y
+        scale = 0.45
+        return x*scale, y*scale
 
 
 def preprocess(image):
@@ -25,9 +35,9 @@ def preprocess(image):
 
 def deskew(img, corners):
     pts1 = np.float32([p.pos for p in corners])
-    pts2 = np.float32([[200, 200], [600, 200], [200, 600], [600, 600]])
+    pts2 = np.float32([[100, 100], [500, 100], [100, 500], [500, 500]])
     transformation = cv2.getPerspectiveTransform(pts1, pts2)
-    orthogonal = cv2.warpPerspective(img, transformation, (800, 800))
+    orthogonal = cv2.warpPerspective(img, transformation, (600, 600))
 
     return orthogonal
     
@@ -44,11 +54,10 @@ def find_board(img, limit):
     low_threshold = 35
     high_threshold = 90
     edges = cv2.Canny(img, low_threshold, high_threshold)
-    cv2.imshow('canny', edges)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 13, 19)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 50, 19)
 
     line_segments = []
-    r = 0.08
+    r = 0.1
     if lines is not None:
         for line in lines:
             for x1, y1, x2, y2 in line:
@@ -85,13 +94,13 @@ def find_board(img, limit):
         positions.append(Position(avg))
 
     # Get the closest 4 intersections to the center
-    positions = sorted(positions, key=lambda p: p.ofset)
+    positions = sorted(positions, key=lambda p: p.offset())
     positions = positions[:limit]   
 
     for p in positions:
         cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4) 
 
-    cv2.imshow('board', line_image)
+    cv2.imshow('{},{}'.format(height, width), line_image)
     return positions
 
 
@@ -100,7 +109,8 @@ def find_counters(frame):
     cimg = np.copy(frame)
     img = preprocess(frame)
 
-    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 7, param1=35, param2=30, minRadius=13, maxRadius=37)
+    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 7, param1=35, param2=30, minRadius=35, maxRadius=62)
+    counters = []
     
     if circles is not None:
         circles = np.uint16(np.around(circles[0]))
@@ -111,12 +121,17 @@ def find_counters(frame):
             colours[i][0] = int(col[0])
             colours[i][1] = int(col[1])
             colours[i][2] = int(col[2])
+            if int(col[2]) > 20:
+                player = Player.HUMAN
+            else:
+                player = Player.COMPUTER
             # draw the outer circle
-            cv2.circle(cimg,(circles[i][0],circles[i][1]),circles[i][2],(0,255,0),2)
+            cv2.circle(cimg, (circles[i][0], circles[i][1]), circles[i][2], (0, 255, 0), 2)
             # draw the center of the circle
-            cv2.circle(cimg,(circles[i][0],circles[i][1]),2,(0,0,255),3)
+            cv2.circle(cimg, (circles[i][0], circles[i][1]), 2, (0, 0, 255), 3)
+            counters.append(Position((circles[i][0], circles[i][1]), radius=circles[i][2], player=player))
 
-        counters = np.concatenate((circles, colours), axis=1)
-        return counters, cimg
+        circles = np.concatenate((circles, colours), axis=1)
+        return circles, cimg
     
     return None, cimg

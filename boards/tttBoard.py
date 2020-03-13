@@ -73,23 +73,42 @@ class TicTacToe(Board):
         self.isects = isects
 
     def compute_state(self, counters):
+        counter_positions = {}
         # Begin to build board representation
         board = [[Player.EMPTY for x in range(3)] for y in range(3)]
 
-        for x in range(9):
-            row = x // 3
-            col = x % 3
+        for c in counters:
+            for x in range(9):
+                row = x // 3
+                col = x % 3
+                if (self.isects[row][col].x < c.x < self.isects[row + 1][col + 1].x and
+                        self.isects[row + 1][col + 1].y > c.y > self.isects[row][col].y):
 
-            for c in counters:
-                if (self.isects[row][col].x < c[0] < self.isects[row + 1][col + 1].x and
-                        self.isects[row + 1][col + 1].y > c[1] > self.isects[row][col].y):
+                    board[col][row] = c.player
+                    counter_positions[col, row] = c
+                    del counters[c]
 
-                    if c[5] > 80:
-                        board[col][row] = Player.HUMAN
-                    else:
-                        board[col][row] = Player.COMPUTER
+                else:
+                    counter_positions[col, row] = Position(self.isects[row][col].pos, player=Player.EMPTY)
 
-        return board
+        counter_positions['spare'] = [c for c in counters if c.player == Player.COMPUTER]
+
+        # for x in range(9):
+        #     row = x // 3
+        #     col = x % 3
+        #
+        #     for c in counters:
+        #         if (self.isects[row][col].x < c[0] < self.isects[row + 1][col + 1].x and
+        #                 self.isects[row + 1][col + 1].y > c[1] > self.isects[row][col].y):
+        #
+        #             if c[5] > 80:
+        #                 player = Player.HUMAN
+        #                 board[col][row] = player
+        #             else:
+        #                 player = Player.COMPUTER
+        #                 board[col][row] = player
+
+        return board, counter_positions
 
     def show(self):
         print("\n\n")

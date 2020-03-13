@@ -1,6 +1,8 @@
 import sys
 import vision
-from negamax import negamax
+from negamax import decision
+from control import make_move
+from boards.board import Player
 from boards.tttBoard import TicTacToe
 from boards.nmmBoard import NineMensMorris
 
@@ -12,26 +14,32 @@ def setup():
     ret, img = cap.read()
 
     # Find the corners to transform the camera frames
-    if corners is None and isinstance(game, NineMensMorris):
-        corners = game.build_board(vision.find_board, img)
-    else:
-        raise Exception("Please show me NMM board first")
+    if corners is None:
+        if isinstance(game, NineMensMorris):
+            corners = game.build_board(vision.find_board, img)
+        else:
+            raise Exception("Please show me NMM board first")
 
     # Find the new relative intersections of the board
     game.build_board(vision.find_board, vision.deskew(img, corners))
 
 
 def play(representation):
-    # representation.show()
     ret, frame = cap.read()
     frame = vision.deskew(frame, corners)
 
+    # Update board
     counters, cimg = vision.find_counters(frame)
     if counters is not None:  # Counters have started being placed
-        board = representation.compute_state(counters)
+        board, counters = representation.compute_state(counters)
         if representation.is_valid_move_state(board):
             representation.update_board(board)
             representation.show()
+
+    # Make computer move
+    if representation.player == Player.COMPUTER:
+        move = decision(representation, 2)
+        make_move(move, counters)
 
     # Display the resulting frame
     vision.cv2.imshow('counters', cimg)
@@ -48,6 +56,8 @@ if __name__ == "__main__":
     cap = vision.cv2.VideoCapture(0)    # Open the camera
 
     setup()
+    # game = TicTacToe()
+    #     # setup()
 
     while play(game):
         if vision.cv2.waitKey(1) & 0xFF == ord('q'):

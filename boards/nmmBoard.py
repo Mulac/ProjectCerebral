@@ -1,9 +1,9 @@
 from .board import Board, Player
+from vision import Position
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
-
 from scipy.spatial.distance import pdist, euclidean
 
 
@@ -71,7 +71,7 @@ class NineMensMorris(Board):
 
                     # Check for valid differences (next player adds a piece to empty position)
                     if vision != model:
-                        if diff_count > 0 or model != Player.EMPTY or vision != self.next_player():
+                        if diff_count > 0 or model != Player.EMPTY or vision != self.player:
                             return False
                         diff_count += 1
 
@@ -170,7 +170,7 @@ class NineMensMorris(Board):
         isects = get_isects(frame, 24)  # First grab the first 24 intersections from the center of the frame
         if len(isects) != 24:
             raise Exception("Could not find 24 intersections.  Found {}".format(len(isects)))
-        self.isects = [[[0 for z in range(3)] for y in range(3)] for x in range(3)]
+        self.isects = [[[Position((0, 0)) for z in range(3)] for y in range(3)] for x in range(3)]
 
         temp_x = sorted(isects, key=lambda p: p.x)
         middle = temp_x[9:15]
@@ -197,25 +197,42 @@ class NineMensMorris(Board):
         self.isects[0][2][1] = middle[5]
 
         # Return the 4 corners for image skewing and pixel -> millimeter translation
-        return [self.isects[0][0][0], self.isects[0][0][2], self.isects[0][2][0], self.isects[0][2][0]]
+        return [self.isects[0][0][0], self.isects[0][0][2], self.isects[0][2][0], self.isects[0][2][2]]
 
     def compute_state(self, counters):
+        counter_positions = {}
         board = [[[Player.EMPTY for z in range(3)] for y in range(3)] for x in range(3)]
 
-        for i in range(3):
-            for j in range(3):
-                for k in range(3):
-                    if j == 1 and k == 1:
-                        continue
-                    isect = self.isects[i][j][k]
-                    for counter in counters:
-                        if euclidean(counter[:2], isect.pos) < 15:
-                            if counter[5] > 80:
-                                board[i][j][k] = Player.HUMAN
-                            else:
-                                board[i][j][k] = Player.COMPUTER
+        for counter in counters:
+            for i in range(3):
+                for j in range(3):
+                    for k in range(3):
+                        if j == 1 and k == 1:
+                            continue
+                        isect = self.isects[i][j][k]
+                        if euclidean(counter.pos, isect.pos) < 15:
+                            board[i][j][k] = counter.player
+                            counter_positions[i, j, k] = counter
+                            del counters[counter]
+                        else:
+                            counter_positions[i, j, k] = Position(self.isects[i][j][k].pos, player=Player.EMPTY)
+
+        counter_positions['spare'] = [c for c in counters if c.player == Player.COMPUTER]
+
+        # for i in range(3):
+        #     for j in range(3):
+        #         for k in range(3):
+        #             if j == 1 and k == 1:
+        #                 continue
+        #             isect = self.isects[i][j][k]
+        #             for counter in counters:
+        #                 if euclidean(counter[:2], isect.pos) < 15:
+        #                     if counter[5] > 40:
+        #                         board[i][j][k] = Player.HUMAN
+        #                     else:
+        #                         board[i][j][k] = Player.COMPUTER
                     
-        return board
+        return board, counter_positions
 
     def show(self):
         print()
