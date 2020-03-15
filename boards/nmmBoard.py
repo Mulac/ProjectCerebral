@@ -213,7 +213,7 @@ class NineMensMorris(Board):
                         if euclidean(counter.pos, isect.pos) < 15:
                             board[i][j][k] = counter.player
                             counter_positions[i, j, k] = counter
-                            del counters[counter]
+                            counters.remove(counter)
                         else:
                             counter_positions[i, j, k] = Position(self.isects[i][j][k].pos, player=Player.EMPTY)
 

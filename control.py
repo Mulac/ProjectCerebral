@@ -13,8 +13,6 @@ def upper(d):
 
 def lower(d):
     theta = math.acos(d/60)
-
-    # Sqrt (9^2 + t^2) + 8t cos(theta+0)
     return math.sqrt(153 + 67.88225099 * math.cos(theta+40/75))
 
 
@@ -32,14 +30,14 @@ def move_arm(x, y):
     return u, l, b
 
 
+# TODO: This will only work for a tictactoe move
 def make_move(move, counters):
-    # TODO:
-    # Find avaliable counter
-    # Get x&y of counter from origin
-    u1, l1, b1 = move_arm(x1, y1)
+    # Move arm to next available counter
+    free_counter = counters['spare'][0]
+    u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
 
-    # TODO:
-    # Find x&y of move from origin
-    u2, l2, b2 = move_arm(x2, y2)
+    # Finds the position of empty move space
+    position = counters[move].translate_from_origin()
+    u2, l2, b2 = move_arm(*position)
 
     os.system("ssh ev3 ./ev3control {} {} {} {} {} {}".format(u1, l1, b1, u2, l2, b2))

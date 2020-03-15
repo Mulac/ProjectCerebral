@@ -1,4 +1,5 @@
 import sys
+import time
 import vision
 from negamax import decision
 from control import make_move
@@ -7,24 +8,22 @@ from boards.tttBoard import TicTacToe
 from boards.nmmBoard import NineMensMorris
 
 corners = None
+computer_turn = False
 
-
-def setup():
+def setup(game):
     global corners
     ret, img = cap.read()
 
     # Find the corners to transform the camera frames
     if corners is None:
-        if isinstance(game, NineMensMorris):
-            corners = game.build_board(vision.find_board, img)
-        else:
-            raise Exception("Please show me NMM board first")
+        corners = game.build_board(vision.find_board, img)
 
     # Find the new relative intersections of the board
     game.build_board(vision.find_board, vision.deskew(img, corners))
 
 
 def play(representation):
+    global computer_turn
     ret, frame = cap.read()
     frame = vision.deskew(frame, corners)
 
@@ -37,9 +36,15 @@ def play(representation):
             representation.show()
 
     # Make computer move
-    if representation.player == Player.COMPUTER:
-        move = decision(representation, 2)
-        make_move(move, counters)
+    if representation.player == Player.HUMAN and not computer_turn:
+        computer_turn = True
+
+    if computer_turn and representation.player == Player.COMPUTER:
+        print(decision(representation, 20))
+        computer_turn = False
+        # make_move(move, counters)
+
+
 
     # Display the resulting frame
     vision.cv2.imshow('counters', cimg)
@@ -52,14 +57,19 @@ def play(representation):
 
 
 if __name__ == "__main__":
-    game = NineMensMorris()             # Create the board game
+    reference = TicTacToe()             # Create the board game
     cap = vision.cv2.VideoCapture(0)    # Open the camera
 
-    setup()
-    # game = TicTacToe()
-    #     # setup()
+    setup(reference)
 
-    while play(game):
+    # while True:
+    #     if vision.cv2.waitKey(1) & 0xFF == ord('q'):
+    #         break
+    #
+    # g = TicTacToe()
+    # setup(g)
+
+    while play(reference):
         if vision.cv2.waitKey(1) & 0xFF == ord('q'):
             break
 

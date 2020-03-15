@@ -45,7 +45,7 @@ class TicTacToe(Board):
                 current = self.board[row][col]
                 vision = brd[row][col]
                 if vision != current:  # Find the differences
-                    # Make sure only 1 difference with the correct player choosinqg empty Position
+                    # Make sure only 1 difference with the correct player choosing empty Position
                     if diff_count > 0 or current != Player.EMPTY or vision != self.player:
                         return False
                     diff_count += 1
@@ -72,25 +72,32 @@ class TicTacToe(Board):
 
         self.isects = isects
 
-    def compute_state(self, counters):
-        counter_positions = {}
-        # Begin to build board representation
-        board = [[Player.EMPTY for x in range(3)] for y in range(3)]
+        # Return the corners of the board
+        return [isects[0][0], isects[3][0], isects[0][3], isects[3][3]]
 
-        for c in counters:
+    def compute_state(self, counters):
+        counter_positions = {}  # Hold all board positions / counter positions
+        board = [[Player.EMPTY for x in range(3)] for y in range(3)]    # Our temporary board state
+
+        for x in range(9):  # First calculate each board position and mark as empty
+            row = x // 3
+            col = x % 3
+            center = 0.5 * (self.isects[row][col].pos + self.isects[row+1][col+1].pos)
+            counter_positions[col, row] = Position(center, player=Player.EMPTY)
+
+        for counter in counters:
             for x in range(9):
                 row = x // 3
-                col = x % 3
-                if (self.isects[row][col].x < c.x < self.isects[row + 1][col + 1].x and
-                        self.isects[row + 1][col + 1].y > c.y > self.isects[row][col].y):
+                col = x % 3         # Find counters that are on a board position
+                if (self.isects[row][col].x < counter.x < self.isects[row + 1][col + 1].x and
+                        self.isects[row + 1][col + 1].y > counter.y > self.isects[row][col].y):
 
-                    board[col][row] = c.player
-                    counter_positions[col, row] = c
-                    del counters[c]
+                    board[col][row] = counter.player        # Update our temp board
+                    counter_positions[col, row] = counter   # Mark board position with the counter
+                    counters.remove(counter)                # Remove that counter as it has been found
+                    break
 
-                else:
-                    counter_positions[col, row] = Position(self.isects[row][col].pos, player=Player.EMPTY)
-
+        # The remaining counters are not on the board so will be marked as spare
         counter_positions['spare'] = [c for c in counters if c.player == Player.COMPUTER]
 
         # for x in range(9):
