@@ -2,7 +2,7 @@ import sys
 import time
 import vision
 from negamax import decision
-from control import make_move
+from control import make_tictactoe_move
 from boards.board import Player
 from boards.tttBoard import TicTacToe
 from boards.nmmBoard import NineMensMorris
@@ -42,7 +42,7 @@ def play(representation):
     if computer_turn and representation.player == Player.COMPUTER:
         print(decision(representation, 20))
         computer_turn = False
-        # make_move(move, counters)
+        # make_tictactoe_move(move, counters)
 
 
 

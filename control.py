@@ -31,7 +31,7 @@ def move_arm(x, y):
 
 
 # TODO: This will only work for a tictactoe move
-def make_move(move, counters):
+def make_tictactoe_move(move, counters):
     # Move arm to next available counter
     free_counter = counters['spare'][0]
     u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
