@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from robot.helper import Player, Position
+from robot.helper import Player, Position, WINDOW_SIZE, BOARD_SIZE
 from poly_point_isect import isect_segments
 from scipy.spatial.distance import pdist, euclidean, squareform
 
@@ -17,12 +17,14 @@ def preprocess(image):
 
 
 def deskew(img, corners):
-    pts1 = np.float32([p.pos for p in corners])
-    pts2 = np.float32([[50, 50], [450, 50], [50, 450], [450, 450]])
-    transformation = cv2.getPerspectiveTransform(pts1, pts2)
-    orthogonal = cv2.warpPerspective(img, transformation, (500, 500))
+    margin = (WINDOW_SIZE - BOARD_SIZE) / 2
 
-    return orthogonal
+    pts1 = np.float32([p.pos for p in corners])
+    pts2 = np.float32([[margin, margin], [BOARD_SIZE+margin, margin], [margin, BOARD_SIZE+margin], [BOARD_SIZE+margin, BOARD_SIZE+margin]])
+
+    transformation = cv2.getPerspectiveTransform(pts1, pts2)
+
+    return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE))
     
 
 def find_board(img, limit, r=0.17):
