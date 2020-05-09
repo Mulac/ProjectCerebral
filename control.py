@@ -30,11 +30,12 @@ def move_arm(x, y):
     return u, l, b
 
 
-# TODO: This will only work for a tictactoe move
 def make_tictactoe_move(move, counters):
+    # for now we just want to see if the arm can move to the right place on the board
+    u1, l1, b1 = 0, 0, 0
     # Move arm to next available counter
-    free_counter = counters['spare'][0]
-    u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
+    # free_counter = counters['spare'][0]
+    # u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
 
     # Finds the position of empty move space
     position = counters[move].translate_from_origin()

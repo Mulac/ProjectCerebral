@@ -3,16 +3,12 @@ channels:
   - defaults
 dependencies:
   - conda
+  - pip
   - python=3.7
   - conda-env
   - conda-build
   - conda-verify
-  - _ipyw_jlab_nb_ext_conf
-  - anaconda
-  - anaconda-navigator
-  - navigator-updater
-  - jupyter
-  - anaconda-clean
-  - opencv=4.1.0
-prefix: /home/calum/anaconda3
-
+  - scipy
+  - pip:
+    - opencv-python
+    - git+https://github.com/ideasman42/isect_segments-bentley_ottmann

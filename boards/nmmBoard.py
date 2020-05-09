@@ -1,9 +1,9 @@
 from .board import Board, Player
 from vision import Position
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import pyqtSlot
+# from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
+# from PyQt5.QtGui import QIcon
+# from PyQt5.QtCore import pyqtSlot
 from scipy.spatial.distance import pdist, euclidean
 
 
