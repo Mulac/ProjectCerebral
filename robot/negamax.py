@@ -1,5 +1,5 @@
 from copy import deepcopy
-from boards.board import Player
+from robot.helper import Player
 
 infinity = float('infinity')
 

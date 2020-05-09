@@ -1,6 +1,5 @@
-from .board import Board, Player
-from vision import Position
-import sys
+from .board import Board, Player, Position
+# import sys
 # from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QGridLayout, QPushButton
 # from PyQt5.QtGui import QIcon
 # from PyQt5.QtCore import pyqtSlot
@@ -240,7 +239,7 @@ class NineMensMorris(Board):
             print(ring)
         # b = self.board
         #
-        # app = QApplication(sys.argv)
+        app = QApplication(sys.argv)
         # win = QWidget()
         # grid = QGridLayout()
         #
@@ -273,4 +272,4 @@ class NineMensMorris(Board):
         # win.setWindowTitle("Nine Mens Morris Representation")
         # win.setGeometry(50,50,450,450)
         # win.show()
-        # sys.exit(app.exec_())
+        sys.exit(app.exec_())

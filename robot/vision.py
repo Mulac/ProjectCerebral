@@ -1,27 +1,10 @@
 import cv2
 import numpy as np
-from boards.board import Player
+from robot.helper import Player, Position
 from poly_point_isect import isect_segments
 from scipy.spatial.distance import pdist, euclidean, squareform
 
 center = None
-
-
-class Position:
-    def __init__(self, pos, radius=None, player=None):
-        self.pos = pos
-        self.radius = radius
-        self.player = player
-        self.x = pos[0]
-        self.y = pos[1]
-
-    def offset(self):
-        return euclidean(center, self.pos)
-
-    def translate_from_origin(self):
-        x, y = 400 - self.x, 400 - self.y
-        scale = 0.45
-        return x*scale, y*scale
 
 
 def preprocess(image):
@@ -94,7 +77,7 @@ def find_board(img, limit, r=0.17):
         positions.append(Position(avg))
 
     # Get the closest 4 intersections to the center
-    positions = sorted(positions, key=lambda p: p.offset())
+    positions = sorted(positions, key=lambda p: euclidean(center, p.pos))
     positions = positions[:limit]   
     print("number isects found:", len(positions))
 

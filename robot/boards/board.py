@@ -1,11 +1,5 @@
-from enum import Enum, auto
+from robot.helper import Position, Player
 import abc 
-
-
-class Player(Enum):
-    EMPTY = 0
-    HUMAN = 1
-    COMPUTER = 2
 
 
 class Board:

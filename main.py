@@ -1,11 +1,11 @@
 import sys
 import time
-import vision
-from negamax import decision
-from control import make_tictactoe_move
-from boards.board import Player
-from boards.tttBoard import TicTacToe
-from boards.nmmBoard import NineMensMorris
+import robot.vision as vision
+from robot.negamax import decision
+from robot.control import make_tictactoe_move
+from robot.helper import Player
+from robot.boards.tttBoard import TicTacToe
+from robot.boards.nmmBoard import NineMensMorris
 
 corners = None
 computer_turn = False

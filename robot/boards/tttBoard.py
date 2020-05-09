@@ -1,6 +1,5 @@
 from itertools import product
-from .board import Board, Player
-from vision import Position
+from .board import Board, Player, Position
 
 
 class TicTacToe(Board):
