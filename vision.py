@@ -42,7 +42,7 @@ def deskew(img, corners):
     return orthogonal
     
 
-def find_board(img, limit):
+def find_board(img, limit, r=0.17):
     global center
     frame = np.copy(img)
     line_image = np.copy(frame) * 0 
@@ -58,7 +58,6 @@ def find_board(img, limit):
     lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 50, 24)
 
     line_segments = []
-    r = 0.17
     if lines is not None:
         for line in lines:
             for x1, y1, x2, y2 in line:
@@ -97,6 +96,7 @@ def find_board(img, limit):
     # Get the closest 4 intersections to the center
     positions = sorted(positions, key=lambda p: p.offset())
     positions = positions[:limit]   
+    print("number isects found:", len(positions))
 
     for p in positions:
         cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4) 
@@ -105,12 +105,12 @@ def find_board(img, limit):
     return positions
 
 
-def find_counters(frame):
+def find_counters(frame, size=60, variance=10):
 
     cimg = np.copy(frame)
     img = preprocess(frame)
 
-    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 7, param1=35, param2=30, minRadius=56, maxRadius=62)
+    circles = cv2.HoughCircles(img, cv2.HOUGH_GRADIENT, 1, 7, param1=35, param2=30, minRadius=size-variance, maxRadius=size+variance)
     counters = []
     
     if circles is not None:

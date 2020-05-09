@@ -55,6 +55,9 @@ class TicTacToe(Board):
 
     def build_board(self, get_isects, frame):
         isects = get_isects(frame, 4)
+
+        if len(isects) != 4:
+            return False, None
         # Order intersections from top to bottom
         isects = sorted(isects, key=lambda p: p.x)
         isects[:2] = sorted(isects[:2], key=lambda p: p.y)
@@ -73,7 +76,7 @@ class TicTacToe(Board):
         self.isects = isects
 
         # Return the corners of the board
-        return [isects[0][0], isects[3][0], isects[0][3], isects[3][3]]
+        return True, [isects[0][0], isects[3][0], isects[0][3], isects[3][3]]
 
     def compute_state(self, counters):
         counter_positions = {}  # Hold all board positions / counter positions

@@ -12,14 +12,17 @@ computer_turn = False
 
 def setup(game):
     global corners
-    ret, img = cap.read()
 
-    # Find the corners to transform the camera frames
-    if corners is None:
-        corners = game.build_board(vision.find_board, img)
+    found = False       # Keep trying to find board until 4 intersections found
+    while not found:
+        ret, img = cap.read()
 
-    # Find the new relative intersections of the board
-    game.build_board(vision.find_board, vision.deskew(img, corners))
+        # Find the corners to transform the camera frames
+        if corners is None:
+            found, corners = game.build_board(vision.find_board, img)
+
+        # Find the new relative intersections of the board
+        found, _ = game.build_board(vision.find_board, vision.deskew(img, corners))
 
 
 def play(representation):
@@ -30,6 +33,7 @@ def play(representation):
     # Update board
     counters, cimg = vision.find_counters(frame)
     if counters is not None:  # Counters have started being placed
+        # counters is now a dictionary mapping from logical position to pixel 'Position'
         board, counters = representation.compute_state(counters)
         if representation.is_valid_move_state(board):
             representation.update_board(board)
@@ -40,13 +44,14 @@ def play(representation):
         computer_turn = True
 
     if computer_turn and representation.player == Player.COMPUTER:
-        print(decision(representation, 20))
+        move = decision(representation, 20)
+        print(move)
         computer_turn = False
         # make_tictactoe_move(move, counters)
 
 
 
-    # Display the resulting frame
+    # Display the frame with counter positions
     vision.cv2.imshow('counters', cimg)
 
     winner = representation.is_end()
