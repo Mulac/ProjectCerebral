@@ -2,30 +2,14 @@
 
 ### This is our current project structure.
 
-Boards is a package that contains all the logic we need for each board game.
-
-There are then 3 main components: **Vision**, **AI** and **Control**.
+There are then 3 main components: **Vision**, **AI** and **Control** which can be found in the robot directory.
 The vision finds lines and circles which are then sent to the board classes to compute valid states.
 The AI module uses a negamax algorithm with alpha beta pruning for efficiency.
 Control is designed specifically for our robot to compute the joint parameters and send these to our motor controller on the Lego EV3.
 
-There is also **helper.py** containing useful classes such as Position and Player used by all modules.
+Boards is a package within robot that contains all the logic we need for each board game.
 
-ProjectCerebral<br>
-├── robot<br>
-│    ├── __init__.py<br>
-|    ├── boards<br>
-|    │    ├── __init__.py<br>
-|    │    ├── board.py<br>
-|    │    ├── nmmBoard.py<br>
-|    │    └── tttBoard.py<br>
-|    |
-|    ├── vision.md<br>
-|    ├── negamax.py<br>
-|    ├── control.py<br>
-|    └── helper.py<br>
-|
-└── main.py<br>
+There is also **helper.py** containing useful classes such as Position and Player used by all modules.
 
 
 ## USE
