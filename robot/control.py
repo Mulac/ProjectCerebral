@@ -1,4 +1,5 @@
 import math
+import sys
 import os
 
 
@@ -16,8 +17,10 @@ def lower(d):
     return math.sqrt(153 + 67.88225099 * math.cos(theta+40/75))
 
 
-def base_angle(x, y):
-    return math.atan2((21-x), (21-y))
+def base(x, y):
+    angle = math.atan2((210-x), (210-y)) - math.pi / 4
+    motor_conversion = 1100 / 0.726
+    return angle * motor_conversion
 
 
 def move_arm(x, y):
@@ -25,7 +28,7 @@ def move_arm(x, y):
 
     u = upper(d)
     l = lower(d)
-    b = base_angle(x, y)
+    b = base(x, y)
 
     return u, l, b
 
@@ -42,3 +45,10 @@ def make_tictactoe_move(move, counters):
     u2, l2, b2 = move_arm(x, y)
 
     os.system("ssh ev3 ./ev3control {} {} {} {} {} {}".format(u1, l1, b1, u2, l2, b2))
+
+
+if __name__ == '__main__':
+    assert len(sys.argv) == 3
+
+    print(move_arm(int(sys.argv[1]), int(sys.argv[2])))
+
