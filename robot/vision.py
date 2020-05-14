@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from robot.helper import Player, Position
+from robot.helper import Player, Position, WINDOW_SIZE, BOARD_SIZE, BOARD
 from poly_point_isect import isect_segments
 from scipy.spatial.distance import pdist, euclidean, squareform
 
@@ -16,16 +16,21 @@ def preprocess(image):
     return blur_gray
 
 
-def deskew(img, corners):
-    pts1 = np.float32([p.pos for p in corners])
-    pts2 = np.float32([[50, 50], [450, 50], [50, 450], [450, 450]])
-    transformation = cv2.getPerspectiveTransform(pts1, pts2)
-    orthogonal = cv2.warpPerspective(img, transformation, (500, 500))
+def deskew(img, pts1, scale=1):
+    board_size = BOARD_SIZE * scale # This allows for skewing with only the center of the tictactoe board
+    margin = (WINDOW_SIZE - board_size) / 2
 
-    return orthogonal
+    pts2 = np.float32([[margin, margin], [board_size+margin, margin], [margin, board_size+margin], [board_size+margin, board_size+margin]])
+
+    transformation = cv2.getPerspectiveTransform(pts1, pts2)
+    inverse = cv2.getPerspectiveTransform(pts2, pts1)
+    board = np.float32([BOARD])
+    corners = cv2.perspectiveTransform(board, inverse)
+
+    return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE)), np.float32(corners).reshape(4, 2) 
     
 
-def find_board(img, limit, r=0.17):
+def find_board(img, limit, r=0.17, debug=True):
     global center
     frame = np.copy(img)
     line_image = np.copy(frame) * 0 
@@ -83,12 +88,13 @@ def find_board(img, limit, r=0.17):
 
     for p in positions:
         cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4) 
+    
+    if debug:
+        cv2.imshow('{},{}'.format(height, width), line_image)
+    return np.float32([p.pos for p in positions])
 
-    cv2.imshow('{},{}'.format(height, width), line_image)
-    return positions
 
-
-def find_counters(frame, size=60, variance=10):
+def find_counters(frame, size=BOARD_SIZE//6, variance=8):
 
     cimg = np.copy(frame)
     img = preprocess(frame)

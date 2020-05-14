@@ -1,5 +1,6 @@
 from itertools import product
 from .board import Board, Player, Position
+from robot.helper import BOARD
 
 
 class TicTacToe(Board):
@@ -52,30 +53,36 @@ class TicTacToe(Board):
         # Ensures a move has actually been made
         return diff_count == 1
 
-    def build_board(self, get_isects, frame):
-        isects = get_isects(frame, 4)
+    def build_board(self, get_isects, frame, deskew):
+        isects = get_isects(frame, 4, r=0)
 
         if len(isects) != 4:
             return False, None
-        # Order intersections from top to bottom
-        isects = sorted(isects, key=lambda p: p.x)
-        isects[:2] = sorted(isects[:2], key=lambda p: p.y)
-        isects[2:] = sorted(isects[2:], key=lambda p: p.y)
-        # Extrapolate intersections to get the whole playing area
-        isects = [isects[:2], isects[2:]]
-        for i in range(2):
-            isects[i].insert(0, Position(2 * isects[i][0].pos - isects[i][1].pos))
-            isects[i].append(Position(2 * isects[i][-1].pos - isects[i][-2].pos))
-        isects.insert(0, list.copy(isects[0]))
-        isects.append(list.copy(isects[-1]))
-        for j in range(4):
-            isects[0][j] = Position([2 * isects[0][j].x - isects[2][j].x, isects[0][j].y])
-            isects[-1][j] = Position([2 * isects[-1][j].x - isects[-3][j].x, isects[-1][j].y])
 
-        self.isects = isects
+        frame, corners = deskew(frame, isects, scale=1/3)
+        #isects = get_isects(frame, 4)
+
+        #if len(isects) != 4:
+        #    return False, None
+
+        # Order intersections from top to bottom
+        #isects = sorted(isects, key=lambda p: p.x)
+        #isects[:2] = sorted(isects[:2], key=lambda p: p.y)
+        #isects[2:] = sorted(isects[2:], key=lambda p: p.y)
+        # Extrapolate intersections to get the whole playing area
+        #isects = [isects[:2], isects[2:]]
+        #for i in range(2):
+        #    isects[i].insert(0, Position(2 * isects[i][0].pos - isects[i][1].pos))
+        #    isects[i].append(Position(2 * isects[i][-1].pos - isects[i][-2].pos))
+        #isects.insert(0, list.copy(isects[0]))
+        #isects.append(list.copy(isects[-1]))
+        #for j in range(4):
+        #    isects[0][j] = Position([2 * isects[0][j].x - isects[2][j].x, isects[0][j].y])
+        #    isects[-1][j] = Position([2 * isects[-1][j].x - isects[-3][j].x, isects[-1][j].y])
+        self.isects = BOARD 
 
         # Return the corners of the board
-        return True, [isects[0][0], isects[3][0], isects[0][3], isects[3][3]]
+        return True, corners
 
     def compute_state(self, counters):
         counter_positions = {}  # Hold all board positions / counter positions

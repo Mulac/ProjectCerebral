@@ -42,9 +42,10 @@ def make_tictactoe_move(move, counters):
 
     # Finds the position of empty move space
     x, y = counters[move].translate_from_origin()
-    u2, l2, b2 = move_arm(x, y)
+    #u2, l2, b2 = move_arm(x, y)
+    b2 = base(x, y)
 
-    os.system("ssh ev3 ./ev3control {} {} {} {} {} {}".format(u1, l1, b1, u2, l2, b2))
+    os.system("ssh ev3 ./ev3control.py {} {} {} {} {} {}".format(u1, l1, b1, 0, 0, b2))
 
 
 if __name__ == '__main__':
