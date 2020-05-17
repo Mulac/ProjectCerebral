@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from robot.helper import Player, Position, WINDOW_SIZE, BOARD_SIZE
+from robot.helper import Player, Position, WINDOW_SIZE, BOARD_SIZE, BOARD
 from poly_point_isect import isect_segments
 from scipy.spatial.distance import pdist, euclidean, squareform
 
@@ -16,18 +16,21 @@ def preprocess(image):
     return blur_gray
 
 
-def deskew(img, corners):
-    margin = (WINDOW_SIZE - BOARD_SIZE) / 2
+def deskew(img, pts1, scale=1):
+    board_size = BOARD_SIZE * scale # This allows for skewing with only the center of the tictactoe board
+    margin = (WINDOW_SIZE - board_size) / 2
 
-    pts1 = np.float32([p.pos for p in corners])
-    pts2 = np.float32([[margin, margin], [BOARD_SIZE+margin, margin], [margin, BOARD_SIZE+margin], [BOARD_SIZE+margin, BOARD_SIZE+margin]])
+    pts2 = np.float32([[margin, margin], [board_size+margin, margin], [margin, board_size+margin], [board_size+margin, board_size+margin]])
 
     transformation = cv2.getPerspectiveTransform(pts1, pts2)
-
-    return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE))
+    inverse = cv2.getPerspectiveTransform(pts2, pts1)
+    board = np.float32([BOARD])
+    corners = cv2.perspectiveTransform(board, inverse)
+    
+    return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE)), np.float32(corners).reshape(4, 2) 
     
 
-def find_board(img, limit, r=0.17):
+def find_board(img, limit, r=0.17, debug=True):
     global center
     frame = np.copy(img)
     line_image = np.copy(frame) * 0 
@@ -82,15 +85,19 @@ def find_board(img, limit, r=0.17):
     positions = sorted(positions, key=lambda p: euclidean(center, p.pos))
     positions = positions[:limit]   
     print("number isects found:", len(positions))
+   
+    # Order positions left to right
+    positions = sorted(positions, key=lambda p: p.x)
 
-    for p in positions:
-        cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4) 
+    if debug:
+        for p in positions:
+            cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4)     
+        cv2.imshow('{},{}'.format(height, width), line_image)
 
-    cv2.imshow('{},{}'.format(height, width), line_image)
-    return positions
+    return np.float32([[p.x, p.y] for p in positions])
 
 
-def find_counters(frame, size=60, variance=10):
+def find_counters(frame, size=BOARD_SIZE//6, variance=8):
 
     cimg = np.copy(frame)
     img = preprocess(frame)

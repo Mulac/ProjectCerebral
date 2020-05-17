@@ -18,17 +18,17 @@ def setup(game):
         ret, img = cap.read()
 
         # Find the corners to transform the camera frames
-        if corners is None:
-            found, corners = game.build_board(vision.find_board, img)
+        found, corners = game.build_board(img, vision)
 
-        # Find the new relative intersections of the board
-        found, _ = game.build_board(vision.find_board, vision.deskew(img, corners))
+    for x, y in corners:
+        vision.cv2.circle(img, (x, y), 2, (0, 0, 255), 3)    
+    vision.cv2.imshow('boards', img)
 
 
 def play(representation):
     global computer_turn
     ret, frame = cap.read()
-    frame = vision.deskew(frame, corners)
+    frame, _ = vision.deskew(frame, corners)
 
     # Update board
     counters, cimg = vision.find_counters(frame)
@@ -47,7 +47,7 @@ def play(representation):
         move = decision(representation, 20)
         print(move)
         computer_turn = False
-        # make_tictactoe_move(move, counters)
+        make_tictactoe_move(move, counters)
 
 
 

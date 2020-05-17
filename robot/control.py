@@ -1,23 +1,30 @@
 import math
+import sys
 import os
 
 
 def dist_from_pivot(x, y):
-    square = (21-x)**2 + (21-y)**2
+    square = (210-x)**2 + (210-y)**2
     return math.sqrt(square)
 
 
 def upper(d):
-    return d / 3
+    length = d / 3
+    motor_conversion = 360 / (6 * math.pi)
+    return length * motor_conversion
 
 
 def lower(d):
-    theta = math.acos(d/60)
-    return math.sqrt(153 + 67.88225099 * math.cos(theta+40/75))
+    theta = math.acos(d/600)
+    length = math.sqrt(153 + 67.88225099 * math.cos(theta+40/75))
+    motor_conversion = 360 / (6 * math.pi)
+    return length * motor_conversion
 
 
-def base_angle(x, y):
-    return math.atan2((21-x), (21-y))
+def base(x, y):
+    angle = math.atan2((210-x), (210-y)) - math.pi / 4
+    motor_conversion = 1100 / 0.726
+    return angle * motor_conversion
 
 
 def move_arm(x, y):
@@ -25,20 +32,31 @@ def move_arm(x, y):
 
     u = upper(d)
     l = lower(d)
-    b = base_angle(x, y)
+    b = base(x, y)
 
-    return u, l, b
+    return int(u), int(l), int(b)
 
 
 def make_tictactoe_move(move, counters):
-    # for now we just want to see if the arm can move to the right place on the board
+    # for now we just want to move the arm to one location
     u1, l1, b1 = 0, 0, 0
-    # Move arm to next available counter
-    # free_counter = counters['spare'][0]
-    # u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
+        # Move arm to next available counter
+        # free_counter = counters['spare'][0]
+        # u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
 
     # Finds the position of empty move space
     x, y = counters[move].translate_from_origin()
     u2, l2, b2 = move_arm(x, y)
 
-    os.system("ssh ev3 ./ev3control {} {} {} {} {} {}".format(u1, l1, b1, u2, l2, b2))
+    os.system("ssh ev3 ./ev3control.py {} {} {} {} {} {}".format(u1, l1, b1, u2, l2, b2))
+
+
+if __name__ == '__main__':
+    assert len(sys.argv) == 4
+    if sys.argv[3] == 'print':
+        print("Motor Degrees")
+        print("Upper: {}\nLower: {}\nBase: {}".format(*move_arm(int(sys.argv[1]), int(sys.argv[2]))))
+    elif sys.argv[3] == 'move':
+        os.system("ssh ev3 ./ev3control.py {} {} {} {} {} {}".format(0, 0, 0, *move_arm(int(sys.argv[1]), int(sys.argv[2]))))
+    else:
+        print("ERROR\nUsage: python3 control.py [x] [y] [print/move]")
