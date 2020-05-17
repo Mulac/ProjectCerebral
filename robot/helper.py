@@ -4,7 +4,7 @@ from enum import Enum, auto
 WINDOW_SIZE = 300
 BOARD_SIZE  = 200
 
-margin = WINDOW_SIZE - BOARD_SIZE
+margin = (WINDOW_SIZE - BOARD_SIZE) / 2
 
 BOARD = [[margin, margin], [margin+BOARD_SIZE, margin],
                 [margin, margin+BOARD_SIZE], [margin+BOARD_SIZE, margin+BOARD_SIZE]]

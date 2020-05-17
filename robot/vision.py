@@ -26,7 +26,7 @@ def deskew(img, pts1, scale=1):
     inverse = cv2.getPerspectiveTransform(pts2, pts1)
     board = np.float32([BOARD])
     corners = cv2.perspectiveTransform(board, inverse)
-
+    
     return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE)), np.float32(corners).reshape(4, 2) 
     
 
@@ -85,13 +85,16 @@ def find_board(img, limit, r=0.17, debug=True):
     positions = sorted(positions, key=lambda p: euclidean(center, p.pos))
     positions = positions[:limit]   
     print("number isects found:", len(positions))
+   
+    # Order positions left to right
+    positions = sorted(positions, key=lambda p: p.x)
 
-    for p in positions:
-        cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4) 
-    
     if debug:
+        for p in positions:
+            cv2.circle(line_image, (int(p.x), int(p.y)), 2, (0, 255, 0), 4)     
         cv2.imshow('{},{}'.format(height, width), line_image)
-    return np.float32([p.pos for p in positions])
+
+    return np.float32([[p.x, p.y] for p in positions])
 
 
 def find_counters(frame, size=BOARD_SIZE//6, variance=8):

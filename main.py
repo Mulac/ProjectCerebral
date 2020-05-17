@@ -18,7 +18,7 @@ def setup(game):
         ret, img = cap.read()
 
         # Find the corners to transform the camera frames
-        found, corners = game.build_board(vision.find_board, img, vision.deskew)
+        found, corners = game.build_board(img, vision)
 
     for x, y in corners:
         vision.cv2.circle(img, (x, y), 2, (0, 0, 255), 3)    

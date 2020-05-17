@@ -1,6 +1,7 @@
+import numpy as np
 from itertools import product
 from .board import Board, Player, Position
-from robot.helper import BOARD
+from robot.helper import BOARD, BOARD_SIZE
 
 
 class TicTacToe(Board):
@@ -53,33 +54,30 @@ class TicTacToe(Board):
         # Ensures a move has actually been made
         return diff_count == 1
 
-    def build_board(self, get_isects, frame, deskew):
-        isects = get_isects(frame, 4, r=0)
+    def build_board(self, frame, vision):
+        isects = vision.find_board(frame, 4, r=0)
 
         if len(isects) != 4:
             return False, None
 
-        frame, corners = deskew(frame, isects, scale=1/3)
-        #isects = get_isects(frame, 4)
+        frame, corners = vision.deskew(frame, isects, scale=1/3)
+        for p in BOARD:
+            vision.cv2.circle(frame, (int(p[0]), int(p[1])), 2, (0, 255, 0), 4)     
 
-        #if len(isects) != 4:
-        #    return False, None
+        vision.cv2.imshow('deskew', frame)
+        
+        a = BOARD_SIZE / 3 # size of the tictactoe spaces
+        x, y = BOARD[0]
 
-        # Order intersections from top to bottom
-        #isects = sorted(isects, key=lambda p: p.x)
-        #isects[:2] = sorted(isects[:2], key=lambda p: p.y)
-        #isects[2:] = sorted(isects[2:], key=lambda p: p.y)
-        # Extrapolate intersections to get the whole playing area
-        #isects = [isects[:2], isects[2:]]
-        #for i in range(2):
-        #    isects[i].insert(0, Position(2 * isects[i][0].pos - isects[i][1].pos))
-        #    isects[i].append(Position(2 * isects[i][-1].pos - isects[i][-2].pos))
-        #isects.insert(0, list.copy(isects[0]))
-        #isects.append(list.copy(isects[-1]))
-        #for j in range(4):
-        #    isects[0][j] = Position([2 * isects[0][j].x - isects[2][j].x, isects[0][j].y])
-        #    isects[-1][j] = Position([2 * isects[-1][j].x - isects[-3][j].x, isects[-1][j].y])
-        self.isects = BOARD 
+        self.isects = [ [Position((x, y)), Position((x+a, y)), Position((x+a+a, y)), Position((x+a+a+a, y))],
+                        [Position((x, y+a)), Position((x+a, y+a)), Position((x+a+a, y+a)), Position((x+a+a+a, y+a))],
+                        [Position((x, y+a+a)), Position((x+a, y+a+a)), Position((x+a+a, y+a+a)), Position((x+a+a+a, y+a+a))],
+                        [Position((x, y+a+a+a)), Position((x+a, y+a+a+a)), Position((x+a+a, y+a+a+a)), Position((x+a+a+a, y+a+a+a))] ]
+        
+        # Convert all positions to numpy array
+        for row in self.isects:
+            for x in row:
+                x.pos = np.array(x.pos)
 
         # Return the corners of the board
         return True, corners
@@ -91,7 +89,7 @@ class TicTacToe(Board):
         for x in range(9):  # First calculate each board position and mark as empty
             row = x // 3
             col = x % 3
-            center = 0.5 * (self.isects[row][col].pos + self.isects[row+1][col+1].pos)
+            center = (self.isects[row][col].pos + self.isects[row+1][col+1].pos) / 2
             counter_positions[col, row] = Position(center, player=Player.EMPTY)
 
         for counter in counters:
