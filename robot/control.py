@@ -3,22 +3,25 @@ import sys
 import os
 
 
-def dist_from_pivot(x, y):
+def reach(x, y):
     square = (210-x)**2 + (210-y)**2
-    return math.sqrt(square)
+    reach = math.sqrt(square)
+    return reach
 
 
 def upper(d):
     length = d / 3
+    change = length - 75
     motor_conversion = 360 / (6 * math.pi)
-    return length * motor_conversion
+    return change * motor_conversion
 
 
 def lower(d):
     theta = math.acos(d/600)
-    length = math.sqrt(153 + 67.88225099 * math.cos(theta+40/75))
-    motor_conversion = 360 / (6 * math.pi)
-    return length * motor_conversion
+    length = math.sqrt(17563 - 17556 * math.cos(theta + math.radians(12.5)))
+    change = length - 128
+    motor_conversion = 360 / (5 * math.pi)
+    return change * motor_conversion
 
 
 def base(x, y):
@@ -28,7 +31,7 @@ def base(x, y):
 
 
 def move_arm(x, y):
-    d = dist_from_pivot(x, y)
+    d = reach(x, y)
 
     u = upper(d)
     l = lower(d)
@@ -39,10 +42,10 @@ def move_arm(x, y):
 
 def make_tictactoe_move(move, counters):
     # for now we just want to move the arm to one location
-    u1, l1, b1 = 0, 0, 0
-        # Move arm to next available counter
-        # free_counter = counters['spare'][0]
-        # u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
+    #u1, l1, b1 = 0, 0, 0
+    # Move arm to next available counter
+    free_counter = counters['spare'][0]
+    u1, l1, b1 = move_arm(*free_counter.translate_from_origin())
 
     # Finds the position of empty move space
     x, y = counters[move].translate_from_origin()

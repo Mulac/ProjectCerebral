@@ -1,4 +1,5 @@
 import numpy as np
+from copy import copy
 from itertools import product
 from .board import Board, Player, Position
 from robot.helper import BOARD, BOARD_SIZE
@@ -85,6 +86,7 @@ class TicTacToe(Board):
     def compute_state(self, counters):
         counter_positions = {}  # Hold all board positions / counter positions
         board = [[Player.EMPTY for x in range(3)] for y in range(3)]    # Our temporary board state
+        spare = copy(counters)  # Will remove as we find them on the board
 
         for x in range(9):  # First calculate each board position and mark as empty
             row = x // 3
@@ -101,26 +103,11 @@ class TicTacToe(Board):
 
                     board[col][row] = counter.player        # Update our temp board
                     counter_positions[col, row] = counter   # Mark board position with the counter
-                    counters.remove(counter)                # Remove that counter as it has been found
+                    spare.remove(counter)                # Remove that counter as it has been found
                     break
 
         # The remaining counters are not on the board so will be marked as spare
-        counter_positions['spare'] = [c for c in counters if c.player == Player.COMPUTER]
-
-        # for x in range(9):
-        #     row = x // 3
-        #     col = x % 3
-        #
-        #     for c in counters:
-        #         if (self.isects[row][col].x < c[0] < self.isects[row + 1][col + 1].x and
-        #                 self.isects[row + 1][col + 1].y > c[1] > self.isects[row][col].y):
-        #
-        #             if c[5] > 80:
-        #                 player = Player.HUMAN
-        #                 board[col][row] = player
-        #             else:
-        #                 player = Player.COMPUTER
-        #                 board[col][row] = player
+        counter_positions['spare'] = [c for c in spare if c.player == Player.COMPUTER]
 
         return board, counter_positions
 

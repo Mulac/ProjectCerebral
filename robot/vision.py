@@ -121,7 +121,7 @@ def find_counters(frame, size=BOARD_SIZE//6, variance=8):
                 cv2.circle(cimg, (circles[i][0], circles[i][1]), circles[i][2], (0, 255, 0), 2)
                 cv2.circle(cimg, (circles[i][0], circles[i][1]), 2, (0, 0, 255), 3)
 
-            counters.append(Position((circles[i][0], circles[i][1]), radius=circles[i][2], player=player))
+            counters.append(Position(np.array([circles[i][0], circles[i][1]]), radius=circles[i][2], player=player))
 
         return counters, cimg
     return None, cimg
