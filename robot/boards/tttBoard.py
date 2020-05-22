@@ -55,17 +55,13 @@ class TicTacToe(Board):
         # Ensures a move has actually been made
         return diff_count == 1
 
-    def build_board(self, frame, vision):
-        isects = vision.find_board(frame, 4, r=0)
+    def build_board(self, frame, find_board, deskew):
+        isects = find_board(frame, 4, r=0)
 
         if len(isects) != 4:
             return False, None
 
-        frame, corners = vision.deskew(frame, isects, scale=1/3)
-        for p in BOARD:
-            vision.cv2.circle(frame, (int(p[0]), int(p[1])), 2, (0, 255, 0), 4)     
-
-        vision.cv2.imshow('deskew', frame)
+        frame, corners = deskew(frame, isects, scale=1/3)
         
         a = BOARD_SIZE / 3 # size of the tictactoe spaces
         x, y = BOARD[0]

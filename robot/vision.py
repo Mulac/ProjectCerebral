@@ -1,12 +1,65 @@
 import cv2
 import numpy as np
-from robot.helper import Player, Position, WINDOW_SIZE, BOARD_SIZE, BOARD
+from itertools import chain
 from poly_point_isect import isect_segments
-from scipy.spatial.distance import pdist, euclidean, squareform
+from scipy.spatial.distance import euclidean, pdist, squareform
+
+from robot.helper import BOARD, BOARD_SIZE, WINDOW_SIZE, Player, Position
 
 center = None
 
 
+class Vision:
+    def __init__(self):
+        self.cap = cv2.VideoCapture(0)          # Open the camera
+        self.memory = [[]] * 100               # Create memory for 100 frames
+
+    @property
+    def counters(self):
+        history = chain.from_iterable(self.memory)
+        counters = []
+
+        cluster = []
+        while history:
+            c = history[0]
+            cluster.append(c)
+
+            for other in history[1:]:
+                if euclidean(c.pos, other.pos) < 10:
+                    cluster.append(other)
+            counters.append(min(cluster, key=lambda x: x.radius))
+            history = [x for x in history if x not in cluster]
+
+        return counters
+                
+    def detect_board(self, board):
+        found = False
+        while not found:    # Keep trying to find board until 4 intersections found
+            ret, img = self.cap.read()
+
+            # Find the corners to transform the camera frames
+            found, self.corners = board.build_board(img, find_board, deskew)
+
+        for x, y in self.corners:
+            cv2.circle(img, (x, y), 2, (0, 0, 255), 3)
+        cv2.imshow('boards', img)
+
+    def update(self):
+        ret, frame = self.cap.read()
+        frame, _ = deskew(frame, self.corners)
+
+        counters, cimg = find_counters(frame)
+        cv2.imshow('counters', cimg)            # Display the frame with counter positions
+
+        # Update the memory
+        self.memory.append(counters)
+        self.memory.pop(0)
+    
+    def __del__(self):
+        self.cap.release()                      # Close the camera
+        cv2.destroyAllWindows()                 # Close all windows
+
+    
 def preprocess(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
