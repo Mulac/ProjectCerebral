@@ -239,7 +239,7 @@ class NineMensMorris(Board):
             print(ring)
         # b = self.board
         #
-        app = QApplication(sys.argv)
+        #app = QApplication(sys.argv)
         # win = QWidget()
         # grid = QGridLayout()
         #
@@ -272,4 +272,4 @@ class NineMensMorris(Board):
         # win.setWindowTitle("Nine Mens Morris Representation")
         # win.setGeometry(50,50,450,450)
         # win.show()
-        sys.exit(app.exec_())
+        #sys.exit(app.exec_())
