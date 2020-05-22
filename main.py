@@ -1,14 +1,10 @@
-import sys
-import time
-
 from robot.boards.nmmBoard import NineMensMorris
 from robot.boards.tttBoard import TicTacToe
 from robot.control import make_tictactoe_move
 from robot.helper import Player
 from robot.negamax import decision
-from robot.vision import Vision
+from robot.vision import Vision, cv2
 
-corners = None
 computer_turn = False
 
 
@@ -31,7 +27,7 @@ def play():
         move = decision(game, 20)
         print(move)
         computer_turn = False
-        make_tictactoe_move(move, counters)
+        #make_tictactoe_move(move, counters)
 
 
     winner = game.is_end()
@@ -48,5 +44,5 @@ if __name__ == "__main__":
     vision.detect_board(game)
 
     while play():
-        if vision.cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord('q'):
             break

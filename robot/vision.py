@@ -16,20 +16,21 @@ class Vision:
 
     @property
     def counters(self):
-        history = chain.from_iterable(self.memory)
+        history = list(chain.from_iterable(self.memory))
         counters = []
 
-        cluster = []
         while history:
+            cluster = []
             c = history[0]
             cluster.append(c)
 
             for other in history[1:]:
-                if euclidean(c.pos, other.pos) < 10:
+                print(c.pos, other.pos, euclidean(c.pos, other.pos))
+                if euclidean(c.pos, other.pos) < 100:
                     cluster.append(other)
             counters.append(min(cluster, key=lambda x: x.radius))
             history = [x for x in history if x not in cluster]
-
+        
         return counters
                 
     def detect_board(self, board):
@@ -52,8 +53,9 @@ class Vision:
         cv2.imshow('counters', cimg)            # Display the frame with counter positions
 
         # Update the memory
-        self.memory.append(counters)
-        self.memory.pop(0)
+        if counters is not None:
+            self.memory.append(counters)
+            self.memory.pop(0)
     
     def __del__(self):
         self.cap.release()                      # Close the camera
@@ -150,7 +152,7 @@ def find_board(img, limit, r=0.17, debug=True):
     return np.float32([[p.x, p.y] for p in positions])
 
 
-def find_counters(frame, size=BOARD_SIZE//6, variance=8):
+def find_counters(frame, size=BOARD_SIZE//6, variance=15):
 
     cimg = np.copy(frame)
     img = preprocess(frame)
@@ -161,7 +163,7 @@ def find_counters(frame, size=BOARD_SIZE//6, variance=8):
     if circles is not None:
         circles = np.uint16(np.around(circles[0]))
 
-        for i in range(len(circles)):
+        for i in range(len(circles) - 1):
             # Grab the colour at the center of the circle
             col = frame[circles[i][1], circles[i][0]]
             red = col[2]
