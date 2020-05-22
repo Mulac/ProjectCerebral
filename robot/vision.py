@@ -1,4 +1,5 @@
 import cv2
+import sys
 import numpy as np
 from itertools import chain
 from poly_point_isect import isect_segments
@@ -25,12 +26,11 @@ class Vision:
             cluster.append(c)
 
             for other in history[1:]:
-                print(c.pos, other.pos, euclidean(c.pos, other.pos))
-                if euclidean(c.pos, other.pos) < 100:
+                if euclidean(c.pos, other.pos) < 15:
                     cluster.append(other)
             counters.append(min(cluster, key=lambda x: x.radius))
             history = [x for x in history if x not in cluster]
-        
+
         return counters
                 
     def detect_board(self, board):
@@ -152,7 +152,7 @@ def find_board(img, limit, r=0.17, debug=True):
     return np.float32([[p.x, p.y] for p in positions])
 
 
-def find_counters(frame, size=BOARD_SIZE//6, variance=15):
+def find_counters(frame, size=BOARD_SIZE//6, variance=10):
 
     cimg = np.copy(frame)
     img = preprocess(frame)
@@ -161,7 +161,7 @@ def find_counters(frame, size=BOARD_SIZE//6, variance=15):
     counters = []
     
     if circles is not None:
-        circles = np.uint16(np.around(circles[0]))
+        circles = np.int32(np.around(circles[0]))
 
         for i in range(len(circles) - 1):
             # Grab the colour at the center of the circle
