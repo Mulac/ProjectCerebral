@@ -12,8 +12,8 @@ center = None
 
 class Vision:
     def __init__(self):
-        self.cap = cv2.VideoCapture(0)          # Open the camera
-        self.memory = [[]] * 100               # Create memory for 100 frames
+        self.cap = cv2.VideoCapture(0)  # Open the camera
+        self.memory = [[]] * 35         # Create memory with a given length
 
     @property
     def counters(self):
@@ -30,7 +30,14 @@ class Vision:
                     cluster.append(other)
             counters.append(min(cluster, key=lambda x: x.radius))
             history = [x for x in history if x not in cluster]
-
+        
+        # Show memory
+        for c in counters:
+            colour = (0, 0, 255) if c.player == Player.COMPUTER else (255, 0, 0)
+            cv2.circle(self.frame, (int(c.x), int(c.y)), c.radius, (0, 255, 0), 2)
+            cv2.circle(self.frame, (int(c.x), int(c.y)), 2, colour, 3)
+        cv2.imshow('memory', self.frame)
+         
         return counters
                 
     def detect_board(self, board):
@@ -47,9 +54,9 @@ class Vision:
 
     def update(self):
         ret, frame = self.cap.read()
-        frame, _ = deskew(frame, self.corners)
+        self.frame, _ = deskew(frame, self.corners)
 
-        counters, cimg = find_counters(frame)
+        counters, cimg = find_counters(self.frame)
         cv2.imshow('counters', cimg)            # Display the frame with counter positions
 
         # Update the memory
@@ -152,7 +159,7 @@ def find_board(img, limit, r=0.17, debug=True):
     return np.float32([[p.x, p.y] for p in positions])
 
 
-def find_counters(frame, size=BOARD_SIZE//6, variance=10):
+def find_counters(frame, size=BOARD_SIZE//7, variance=6):
 
     cimg = np.copy(frame)
     img = preprocess(frame)
@@ -167,7 +174,7 @@ def find_counters(frame, size=BOARD_SIZE//6, variance=10):
             # Grab the colour at the center of the circle
             col = frame[circles[i][1], circles[i][0]]
             red = col[2]
-            if red > 40:
+            if red > 70:
                 player = Player.HUMAN
                 cv2.circle(cimg, (circles[i][0], circles[i][1]), circles[i][2], (0, 255, 0), 2)
                 cv2.circle(cimg, (circles[i][0], circles[i][1]), 2, (255, 0, 0), 3)
