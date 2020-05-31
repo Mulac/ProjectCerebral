@@ -13,9 +13,9 @@ center = None
 class Vision:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)  # Open the camera
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 0)
         self.memory = [[]] * 35         # Create memory with a given length
 
-    @property
     def counters(self):
         history = list(chain.from_iterable(self.memory))
         counters = []
@@ -63,7 +63,9 @@ class Vision:
         if counters is not None:
             self.memory.append(counters)
             self.memory.pop(0)
-    
+        
+        return self.counters()
+
     def __del__(self):
         self.cap.release()                      # Close the camera
         cv2.destroyAllWindows()                 # Close all windows
@@ -92,7 +94,7 @@ def deskew(img, pts1, scale=1):
     return cv2.warpPerspective(img, transformation, (WINDOW_SIZE, WINDOW_SIZE)), np.float32(corners).reshape(4, 2) 
     
 
-def find_board(img, limit, r=0.17, debug=True):
+def find_board(img, limit, r=0.17, maxLineGap=24, debug=True):
     global center
     frame = np.copy(img)
     line_image = np.copy(frame) * 0 
@@ -105,7 +107,7 @@ def find_board(img, limit, r=0.17, debug=True):
     high_threshold = 90
     edges = cv2.Canny(img, low_threshold, high_threshold)
     cv2.imshow('canny', edges)
-    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 50, 24)
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 40, np.array([]), 50, maxLineGap)
 
     line_segments = []
     if lines is not None:

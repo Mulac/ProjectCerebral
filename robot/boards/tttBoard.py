@@ -56,7 +56,7 @@ class TicTacToe(Board):
         return diff_count == 1
 
     def build_board(self, frame, find_board, deskew):
-        isects = find_board(frame, 4, r=0)
+        isects = find_board(frame, 4, r=0, maxLineGap=15)
 
         if len(isects) != 4:
             return False, None

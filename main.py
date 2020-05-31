@@ -11,23 +11,24 @@ computer_turn = False
 def play():
     global computer_turn
     
-    vision.update()
-
+    counters = vision.update()
     # counters is now a dictionary mapping from logical position to pixel 'Position'
-    board, counters = game.compute_state(vision.counters)
+    board, counters = game.compute_state(counters)
     if game.is_valid_move_state(board):
         game.update_board(board)
         game.show()
 
-    # Make computer move
+    # Let computer be ready to play next
     if game.player == Player.HUMAN and not computer_turn:
         computer_turn = True
 
+    # Make computer move
     if computer_turn and game.player == Player.COMPUTER:
         move = decision(game, 20)
         print(move)
         computer_turn = False
-        #make_tictactoe_move(move, counters)
+        if move:
+            make_tictactoe_move(move, counters)
 
 
     winner = game.is_end()
